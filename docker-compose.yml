@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+    db:
+        image: postgres
+        container_name: bundelt_db
+        restart: always
+        ports:
+            - 5432:5432
+        environment: 
+            POSTGRES_USER: "postgres"
+            POSTGRES_PASSWORD: "postgres"
+        volumes: 
+            - ./db/postgres-data:/var/lib/postgresql/data
+            - ./db/sql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql
+            - ./db/sql/fill_tables.sql:/docker-entrypoint-initdb.d/fill_tables.sql
+    app:
+        container_name: bundelt_api
+        build: 
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - 13000:13000
+        environment: 
+            PORT: 13000
+            DB_CONN: "postgres://user:password@db:5432/db?sslmode=disable"
+        depends_on:
+            - db
