@@ -19,6 +19,8 @@ const (
 type (
 	PostgreSQLStorage interface {
 		UsersStorage
+		UserGroupsStorage
+		GroupStorage
 	}
 
 	postgreSQLStorage struct {

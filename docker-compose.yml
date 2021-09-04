@@ -3,9 +3,7 @@ version: '3'
 services:
     app:
         container_name: bundelt_api
-        build: 
-            context: .
-            dockerfile: Dockerfile
+        build: .
         ports:
             - 13000:13000
         environment: 

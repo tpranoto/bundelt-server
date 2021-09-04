@@ -13,9 +13,19 @@ CREATE TABLE IF NOT EXISTS users (
   update_time TIMESTAMP
 );
 
--- Creation of product table
-CREATE TABLE IF NOT EXISTS product (
-  product_id INT NOT NULL,
-  name varchar(250) NOT NULL,
-  PRIMARY KEY (product_id)
+-- Creation of user group rel table
+CREATE TABLE IF NOT EXISTS user_group_rel (
+  user_fb_id VARCHAR(60) NOT NULL,
+  group_id VARCHAR(60) NOT NULL,
+  PRIMARY KEY (user_fb_id, group_id)
+);
+
+-- Creation of group table
+CREATE TABLE IF NOT EXISTS groups(
+  group_id VARCHAR(60) NOT NULL PRIMARY KEY,
+  group_name VARCHAR(60) NOT NULL,
+  group_desc TEXT NOT NULL,
+  created VARCHAR(30) NOT NULL,
+  lat DOUBLE PRECISION,
+  lon DOUBLE PRECISION
 );
