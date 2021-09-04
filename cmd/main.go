@@ -8,11 +8,11 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/tpranoto/bundelt-server/common"
-	"github.com/tpranoto/bundelt-server/internal/app/users"
+	http "github.com/tpranoto/bundelt-server/internal/app"
 	"github.com/tpranoto/bundelt-server/internal/storage"
 )
 
-var usersApp users.App
+var app http.App
 var logger *log.Logger
 
 func init() {
@@ -20,16 +20,20 @@ func init() {
 	logger = log.New(os.Stdout, "", log.Ldate|log.Ltime)
 	logger.SetOutput(os.Stdout)
 
-	usersApp = users.App{
-		Router:      router,
-		Port:        ":" + common.GetEnv("PORT", "13000"),
-		UserStorage: storage.NewPostgreSQLStorage(logger),
-		Logger:      logger,
+	postgresDB := storage.NewPostgreSQLStorage(logger)
+
+	app = http.App{
+		Router:              router,
+		Port:                ":" + common.GetEnv("PORT", "13000"),
+		UserStorage:         postgresDB,
+		UserGroupRelStorage: postgresDB,
+		GroupStorage:        postgresDB,
+		Logger:              logger,
 	}
 }
 
 func main() {
 	logger.Println("Starting bundelt server...")
 
-	usersApp.Run()
+	app.Run()
 }
