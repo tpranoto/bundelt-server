@@ -13,6 +13,7 @@ func (a *App) handleGroupAdd(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -20,12 +21,14 @@ func (a *App) handleGroupAdd(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &input)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	err = a.GroupStorage.WriteGroupDetails(input)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -38,11 +41,11 @@ func (a *App) handleDeleteGroupDetail(w http.ResponseWriter, r *http.Request) {
 	err := a.GroupStorage.DeleteGroupDetails(paramGroupID)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-
 }
 
 func (a *App) handleNearbyGroups(w http.ResponseWriter, r *http.Request) {
@@ -58,10 +61,10 @@ func (a *App) handleNearbyGroups(w http.ResponseWriter, r *http.Request) {
 	groupRes, err := a.GroupStorage.GetNearbyGroups(lat, lon, limit, offset)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	res, _ := json.Marshal(groupRes)
 	w.Write(res)
-	w.WriteHeader(http.StatusOK)
 }

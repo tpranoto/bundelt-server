@@ -89,16 +89,20 @@ func (p postgreSQLStorage) DeleteGroupDetails(groupID string) error {
 }
 
 func (p postgreSQLStorage) GetNearbyGroups(lat, lon float64, limit, offset int) ([]GroupInfoWithDistance, error) {
-	q := fmt.Sprintf(`SELECT group_id,group_name,group_desc,created,lat,lon,
-			111.045* DEGREES(ACOS(LEAST(1.0, COS(RADIANS(latpoint))
-                 * COS(RADIANS(lat))
-                 * COS(RADIANS(longpoint) - RADIANS(lon))
-                 + SIN(RADIANS(latpoint))
-                 * SIN(RADIANS(lat))))) AS distance
-			FROM groups
-			JOIN(
-				SELECT %f AS latpoint, %f AS longpoint
-			) AS p ON 1=1
+	q := fmt.Sprintf(`SELECT group_id,group_name,group_desc,created,lat,lon,distance
+			FROM(
+				SELECT group_id,group_name,group_desc,created,lat,lon,
+				111.045* DEGREES(ACOS(LEAST(1.0, COS(RADIANS(latpoint))
+                 	* COS(RADIANS(lat))
+                 	* COS(RADIANS(longpoint) - RADIANS(lon))
+                 	+ SIN(RADIANS(latpoint))
+                 	* SIN(RADIANS(lat))))) AS distance
+				FROM groups
+				JOIN(
+					SELECT %f AS latpoint, %f AS longpoint
+				) AS p ON 1=1
+			) AS dt
+			WHERE distance < 20
 			ORDER BY distance
 			LIMIT $1 OFFSET $2`, lat, lon)
 

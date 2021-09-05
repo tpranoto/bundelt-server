@@ -39,6 +39,7 @@ func (a *App) handlerSignUp(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -46,12 +47,14 @@ func (a *App) handlerSignUp(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &input)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	err = a.UserStorage.CreateUserInfo(input)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 

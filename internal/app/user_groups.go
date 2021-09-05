@@ -13,6 +13,7 @@ func (a *App) handlerUserGroupAdd(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -20,12 +21,14 @@ func (a *App) handlerUserGroupAdd(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &input)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	err = a.UserGroupRelStorage.WriteUserGroupRelation(input)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -57,6 +60,7 @@ func (a *App) handlerDeleteUserGroup(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -64,12 +68,14 @@ func (a *App) handlerDeleteUserGroup(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &input)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	err = a.UserGroupRelStorage.DeleteUserGroup(input)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -80,6 +86,7 @@ func (a *App) handlerDeleteUserGroupDetails(w http.ResponseWriter, r *http.Reque
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -87,18 +94,21 @@ func (a *App) handlerDeleteUserGroupDetails(w http.ResponseWriter, r *http.Reque
 	err = json.Unmarshal(body, &input)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	err = a.UserGroupRelStorage.DeleteUserGroup(input)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	err = a.GroupStorage.DeleteGroupDetails(input.GroupId)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -109,6 +119,7 @@ func (a *App) handlerAddUserGroupDetails(w http.ResponseWriter, r *http.Request)
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -116,6 +127,7 @@ func (a *App) handlerAddUserGroupDetails(w http.ResponseWriter, r *http.Request)
 	err = json.Unmarshal(body, &input)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -139,12 +151,14 @@ func (a *App) handlerAddUserGroupDetails(w http.ResponseWriter, r *http.Request)
 	err = a.UserGroupRelStorage.WriteUserGroupRelation(input1)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	err = a.GroupStorage.WriteGroupDetails(input2)
 	if err != nil {
 		a.Logger.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
