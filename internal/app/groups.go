@@ -17,7 +17,7 @@ func (a *App) handleGroupAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	input := storage.GroupInfo{}
+	input := storage.GroupInput{}
 	err = json.Unmarshal(body, &input)
 	if err != nil {
 		a.Logger.Println(err)
@@ -25,20 +25,28 @@ func (a *App) handleGroupAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = a.GroupStorage.WriteGroupDetails(input)
+	groupInfo, err := a.GroupStorage.WriteGroupDetails(input)
 	if err != nil {
 		a.Logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	res, _ := json.Marshal(groupInfo)
+	w.Write(res)
 }
 
 func (a *App) handleDeleteGroupDetail(w http.ResponseWriter, r *http.Request) {
 	paramGroupID := r.FormValue("group_id")
 
-	err := a.GroupStorage.DeleteGroupDetails(paramGroupID)
+	groupID, err := strconv.ParseInt(paramGroupID, 10, 64)
+	if err != nil {
+		a.Logger.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	err = a.GroupStorage.DeleteGroupDetails(groupID)
 	if err != nil {
 		a.Logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -65,6 +73,27 @@ func (a *App) handleNearbyGroups(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, _ := json.Marshal(groupRes)
+	result := []storage.GroupNearbyDetails{}
+	for _, group := range groupRes {
+		count, err := a.UserGroupRelStorage.FindMemberCountByGroupId(group.GroupID)
+		if err != nil {
+			a.Logger.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		result = append(result, storage.GroupNearbyDetails{
+			GroupID:   group.GroupID,
+			GroupName: group.GroupName,
+			Desc:      group.Desc,
+			Created:   group.Created,
+			Latitude:  group.Latitude,
+			Longitude: group.Longitude,
+			Distance:  group.Distance,
+			Members:   count,
+		})
+	}
+
+	res, _ := json.Marshal(result)
 	w.Write(res)
 }

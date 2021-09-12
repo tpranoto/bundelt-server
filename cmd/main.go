@@ -23,11 +23,13 @@ func init() {
 	postgresDB := storage.NewPostgreSQLStorage(logger)
 
 	app = http.App{
+		Domain:              common.GetEnv("DOMAIN", "localhost"),
 		Router:              router,
 		Port:                ":" + common.GetEnv("PORT", "13000"),
 		UserStorage:         postgresDB,
 		UserGroupRelStorage: postgresDB,
 		GroupStorage:        postgresDB,
+		GroupMessageStorage: postgresDB,
 		Logger:              logger,
 	}
 }

@@ -21,6 +21,7 @@ type (
 		UsersStorage
 		UserGroupsStorage
 		GroupStorage
+		GroupMessageStorage
 	}
 
 	postgreSQLStorage struct {

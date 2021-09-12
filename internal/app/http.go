@@ -10,24 +10,28 @@ import (
 )
 
 type App struct {
+	Domain              string
 	Router              *mux.Router
 	Port                string
 	UserStorage         storage.UsersStorage
 	UserGroupRelStorage storage.UserGroupsStorage
 	GroupStorage        storage.GroupStorage
+	GroupMessageStorage storage.GroupMessageStorage
 	Logger              *log.Logger
 }
 
 func (a *App) assignRoutes() {
-	a.httpHandler(http.MethodGet, "/", middleware.MultiMiddlwares(a.handlerHealthCheck))
+	//users
 	a.httpHandler(http.MethodGet, "/user", middleware.MultiMiddlwares(a.handlerGetUser))
 	a.httpHandler(http.MethodPost, "/signup", middleware.MultiMiddlwares(a.handlerSignUp))
-	a.httpHandler(http.MethodPost, "/login", middleware.MultiMiddlwares(a.handlerHealthCheck))
+	a.httpHandler(http.MethodPost, "/login", middleware.MultiMiddlwares(a.handlerLogIn))
+	a.httpHandler(http.MethodPost, "/logout", middleware.MultiMiddlwares(a.handlerLogOut))
 
 	//user groups
 	a.httpHandler(http.MethodPost, "/user_group/add", middleware.MultiMiddlwares(a.handlerUserGroupAdd))
 	a.httpHandler(http.MethodPost, "/user_group/delete", middleware.MultiMiddlwares(a.handlerDeleteUserGroup))
 	a.httpHandler(http.MethodGet, "/user_group/get", middleware.MultiMiddlwares(a.handlerUserGroupDetailGet))
+	a.httpHandler(http.MethodGet, "/group/member", middleware.MultiMiddlwares(a.handlerGroupMemberGet))
 	a.httpHandler(http.MethodPost, "/user_group_detail/add", middleware.MultiMiddlwares(a.handlerAddUserGroupDetails))
 	a.httpHandler(http.MethodPost, "/user_group_detail/delete", middleware.MultiMiddlwares(a.handlerDeleteUserGroupDetails))
 
@@ -35,6 +39,10 @@ func (a *App) assignRoutes() {
 	a.httpHandler(http.MethodPost, "/group/add", middleware.MultiMiddlwares(a.handleGroupAdd))
 	a.httpHandler(http.MethodPost, "/group/delete", middleware.MultiMiddlwares(a.handleDeleteGroupDetail))
 	a.httpHandler(http.MethodGet, "/group/nearby", middleware.MultiMiddlwares(a.handleNearbyGroups))
+
+	//group message
+	a.httpHandler(http.MethodGet, "/message/group", middleware.MultiMiddlwares(a.handleGetGroupMessage))
+	a.httpHandler(http.MethodPost, "/message/group/add", middleware.MultiMiddlwares(a.handleAddNewGroupMessage))
 }
 
 func (a *App) httpHandler(method string, pattern string, handler func(http.ResponseWriter, *http.Request)) {
