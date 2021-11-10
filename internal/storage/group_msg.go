@@ -44,7 +44,7 @@ func (p *postgreSQLStorage) WriteNewMessage(input GroupMsgInput) error {
 }
 
 func (p *postgreSQLStorage) GetMessageByGroupID(groupID int64) ([]GroupMsgInfo, []int64, error) {
-	q := `SELECT * FROM group_messages WHERE group_id=$1 ORDER BY create_time ASC`
+	q := `SELECT * FROM group_messages WHERE group_id=$1 ORDER BY create_time DESC`
 
 	rows, err := p.db.QueryContext(p.ctx, q, groupID)
 	if err != nil {

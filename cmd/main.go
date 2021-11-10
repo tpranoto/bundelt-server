@@ -30,6 +30,9 @@ func init() {
 		UserGroupRelStorage: postgresDB,
 		GroupStorage:        postgresDB,
 		GroupMessageStorage: postgresDB,
+		EventStorage:        postgresDB,
+		EventGroupStorage:   postgresDB,
+		UserEventStorage:    postgresDB,
 		Logger:              logger,
 	}
 }

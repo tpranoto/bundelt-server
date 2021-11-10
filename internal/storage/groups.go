@@ -43,6 +43,7 @@ type (
 
 	GroupNearbyDetails struct {
 		GroupID   int64   `db:"group_id" json:"group_id"`
+		Joined    bool    `db:"joined" json:"joined"`
 		GroupName string  `db:"group_name" json:"group_name"`
 		Desc      string  `db:"group_desc" json:"desc"`
 		Created   string  `db:"created" json:"created"`

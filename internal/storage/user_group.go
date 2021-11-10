@@ -1,17 +1,21 @@
 package storage
 
+import "database/sql"
+
 type UserGroupsStorage interface {
 	WriteUserGroupRelation(input UserGroupRel) error
 	FindGroupsByUserId(userId int64) ([]int64, error)
 	DeleteUserGroup(input UserGroupRel) error
 	FindMemberCountByGroupId(groupId int64) (int64, error)
-	FindMemberListByGroupId(groupId int64) ([]int64, error)
+	FindMemberListByGroupId(groupId int64) (map[int64]UserGroupRel, []int64, error)
+	CheckUserJoinedInGroup(groupId int64, userId int64) (bool, error)
 }
 
 type (
 	UserGroupRel struct {
 		UserId  int64 `db:"user_id" json:"user_id"`
 		GroupId int64 `db:"group_id" json:"group_id"`
+		Role    int   `db:"role" json:"role"`
 	}
 
 	UserGroupDetailInput struct {
@@ -32,12 +36,21 @@ type (
 		Latitude  float64 `db:"lat" json:"lat"`
 		Longitude float64 `db:"lon" json:"lon"`
 	}
+
+	UserGroupRelWithGroupDetails struct {
+		UserId    int64   `db:"user_id" json:"user_id"`
+		GroupId   int64   `db:"group_id" json:"group_id"`
+		Role      int     `db:"role" json:"role"`
+		FullName  string  `db:"full_name" json:"full_name"`
+		Latitude  float64 `db:"lat" json:"lat"`
+		Longitude float64 `db:"lon" json:"lon"`
+	}
 )
 
 func (p *postgreSQLStorage) WriteUserGroupRelation(input UserGroupRel) error {
-	q := `INSERT INTO user_group_rel(user_id, group_id) VALUES($1,$2)`
+	q := `INSERT INTO user_group_rel(user_id, group_id, role) VALUES($1,$2,$3)`
 
-	_, err := p.db.ExecContext(p.ctx, q, input.UserId, input.GroupId)
+	_, err := p.db.ExecContext(p.ctx, q, input.UserId, input.GroupId, input.Role)
 	if err != nil {
 		return err
 	}
@@ -106,29 +119,42 @@ func (p *postgreSQLStorage) DeleteUserGroup(input UserGroupRel) error {
 	return nil
 }
 
-func (p *postgreSQLStorage) FindMemberListByGroupId(groupId int64) ([]int64, error) {
-	q := `SELECT COUNT(user_id) FROM user_group_rel WHERE group_id = $1`
+func (p *postgreSQLStorage) FindMemberListByGroupId(groupId int64) (map[int64]UserGroupRel, []int64, error) {
+	q := `SELECT group_id, user_id, role FROM user_group_rel WHERE group_id = $1`
 
 	rows, err := p.db.QueryContext(p.ctx, q, groupId)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer rows.Close()
 
-	result := []int64{}
+	result := map[int64]UserGroupRel{}
+	userIDs := []int64{}
 	for rows.Next() {
-		var res int64
+		var res UserGroupRel
 
-		err = rows.Scan(&res)
+		err = rows.Scan(&res.GroupId, &res.UserId, &res.Role)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
-		result = append(result, res)
+		result[res.UserId] = res
+		userIDs = append(userIDs, res.UserId)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return result, nil
+	return result, userIDs, nil
+}
+
+func (p postgreSQLStorage) CheckUserJoinedInGroup(groupId int64, userId int64) (res bool, err error) {
+	q := `SELECT 1 FROM user_group_rel WHERE group_id = $1 AND user_id = $2`
+
+	err = p.db.QueryRowContext(p.ctx, q, groupId, userId).Scan(&res)
+	if err != nil && err != sql.ErrNoRows {
+		return
+	}
+
+	return res, nil
 }

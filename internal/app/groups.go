@@ -57,6 +57,8 @@ func (a *App) handleDeleteGroupDetail(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) handleNearbyGroups(w http.ResponseWriter, r *http.Request) {
+	paramUser := r.FormValue("user_id")
+	userID, _ := strconv.ParseInt(paramUser, 10, 64)
 	paramLat := r.FormValue("lat")
 	lat, _ := strconv.ParseFloat(paramLat, 64)
 	paramLon := r.FormValue("lon")
@@ -82,8 +84,16 @@ func (a *App) handleNearbyGroups(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		joined, err := a.UserGroupRelStorage.CheckUserJoinedInGroup(group.GroupID, userID)
+		if err != nil {
+			a.Logger.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		result = append(result, storage.GroupNearbyDetails{
 			GroupID:   group.GroupID,
+			Joined:    joined,
 			GroupName: group.GroupName,
 			Desc:      group.Desc,
 			Created:   group.Created,

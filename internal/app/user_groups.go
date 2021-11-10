@@ -187,7 +187,7 @@ func (a *App) handlerGroupMemberGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userIDs, err := a.UserGroupRelStorage.FindMemberListByGroupId(groupID)
+	users, userIDs, err := a.UserGroupRelStorage.FindMemberListByGroupId(groupID)
 	if err != nil {
 		a.Logger.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -200,7 +200,18 @@ func (a *App) handlerGroupMemberGet(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	result := []storage.UserGroupRelWithGroupDetails{}
+	for _, info := range userInfo {
+		result = append(result, storage.UserGroupRelWithGroupDetails{
+			UserId:    info.UserID,
+			GroupId:   users[info.UserID].GroupId,
+			Role:      users[info.UserID].Role,
+			FullName:  info.FullName,
+			Latitude:  info.Latitude,
+			Longitude: info.Longitude,
+		})
+	}
 
-	res, _ := json.Marshal(userInfo)
+	res, _ := json.Marshal(result)
 	w.Write(res)
 }

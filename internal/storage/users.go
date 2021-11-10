@@ -13,7 +13,7 @@ import (
 type UsersStorage interface {
 	CreateUserInfo(input UserInfoInput) (int64, error)
 	UpdateUserInfo(input UpdateUserInfoInput) error
-	GetUserInfo(userID int64) (UserInfoOutput, error)
+	GetUserInfo(userID int64) (UserInfo, error)
 	GetMultipleUserInfo(userIDs []int64) ([]UserInfoOutput, error)
 	GetUserLogin(inp UserLoginInput) (UserInfoOutput, bool, error)
 }
@@ -66,7 +66,7 @@ type (
 	}
 )
 
-func (p *postgreSQLStorage) GetUserInfo(userID int64) (userDetails UserInfoOutput, err error) {
+func (p *postgreSQLStorage) GetUserInfo(userID int64) (userDetails UserInfo, err error) {
 	query := fmt.Sprintf(`SELECT * FROM users WHERE user_id = %d`, userID)
 
 	err = p.db.GetContext(p.ctx, &userDetails, query)
